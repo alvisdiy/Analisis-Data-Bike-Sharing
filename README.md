@@ -58,8 +58,8 @@ Dataset terdiri dari data penyewaan sepeda per hari dan per jam dengan berbagai 
 ### 1. Clone Repository
 
 ```bash
-git clone <URL_REPO_ANDA>
-cd submission
+git clone https://github.com/alvisdiy/Analisis-Data-Bike-Sharing.git
+cd Analisis-Data-Bike-Sharing
 ```
 
 ### 2. Buat Virtual Environment
@@ -96,7 +96,7 @@ streamlit run dashboard/dashboard.py
 
 ## 🌐 Dashboard Online
 
-Tautan dashboard dapat ditemukan pada file `url.txt`.
+Tautan dashboard dapat ditemukan pada file [url.txt](url.txt).
 
 ## 🛠 Tools & Library
 
