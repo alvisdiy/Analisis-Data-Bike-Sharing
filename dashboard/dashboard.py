@@ -1,5 +1,6 @@
 import pandas as pd
 import streamlit as st
+import os
 
 st.set_page_config(page_title="Capital Bikeshare Dashboard", page_icon="🚲", layout="wide")
 
@@ -23,13 +24,20 @@ def create_season_df(df):
 # ----------------------------------------------------------------
 # LOAD DATA
 # ----------------------------------------------------------------
-@st.cache_data
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+ROOT_DIR = os.path.dirname(BASE_DIR)
+
 def load_data():
-    day_df = pd.read_csv("dashboard\main_data.csv")
-    hour_df = pd.read_csv("data/hour.csv") 
-    
+    day_path = os.path.join(BASE_DIR, "main_data.csv")
+    hour_path = os.path.join(ROOT_DIR, "data", "hour.csv")
+
+    day_df = pd.read_csv(day_path)
+    hour_df = pd.read_csv(hour_path)
+
     day_df['dteday'] = pd.to_datetime(day_df['dteday'])
     hour_df['dteday'] = pd.to_datetime(hour_df['dteday'])
+
     return day_df, hour_df
 
 day_df, hour_df = load_data()
