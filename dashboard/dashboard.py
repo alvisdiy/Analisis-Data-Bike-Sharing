@@ -107,20 +107,28 @@ with st.sidebar:
     workingday_option = st.selectbox("Tipe Hari", ["All", "Hari Kerja", "Libur"])
 
 # ----------------------------------------------------------------
-# LOGIKA FILTERING
+# LOGIKA FILTERING (SUDAH DIPERBAIKI)
 # ----------------------------------------------------------------
 main_day_df = day_df[(day_df["dteday"].dt.date >= start_date) & (day_df["dteday"].dt.date <= end_date)]
 main_hour_df = hour_df[(hour_df["dteday"].dt.date >= start_date) & (hour_df["dteday"].dt.date <= end_date)]
 
 if selected_season != 'All':
-    season_map = {'Spring': 1, 'Summer': 2, 'Fall': 3, 'Winter': 4}
-    main_day_df = main_day_df[main_day_df['season'] == season_map[selected_season]]
-    main_hour_df = main_hour_df[main_hour_df['season'] == season_map[selected_season]]
+    season_map_for_hour = {'Spring': 1, 'Summer': 2, 'Fall': 3, 'Winter': 4}
+    
+    # Filter day_df menggunakan TEKS (karena main_data.csv sudah berupa teks)
+    main_day_df = main_day_df[main_day_df['season'] == selected_season]
+    
+    # Filter hour_df menggunakan ANGKA (karena hour.csv masih data mentah)
+    main_hour_df = main_hour_df[main_hour_df['season'] == season_map_for_hour[selected_season]]
 
 if workingday_option != 'All':
-    work_val = 1 if workingday_option == "Hari Kerja" else 0
-    main_day_df = main_day_df[main_day_df['workingday'] == work_val]
-    main_hour_df = main_hour_df[main_hour_df['workingday'] == work_val]
+    # Konversi input filter menjadi nilai yang cocok untuk masing-masing dataset
+    work_val_day = "Working Day" if workingday_option == "Hari Kerja" else "Holiday/Weekend"
+    work_val_hour = 1 if workingday_option == "Hari Kerja" else 0
+    
+    # Filter dengan tipe data yang sesuai
+    main_day_df = main_day_df[main_day_df['workingday'] == work_val_day]
+    main_hour_df = main_hour_df[main_hour_df['workingday'] == work_val_hour]
 
 # Generate DataFrames 
 daily_rentals_df = create_daily_rentals_df(main_day_df)
