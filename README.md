@@ -59,7 +59,7 @@ Dataset terdiri dari data penyewaan sepeda per hari dan per jam dengan berbagai 
 
 ```bash
 git clone https://github.com/alvisdiy/Analisis-Data-Bike-Sharing.git
-cd Analisis-Data-Bike-Sharing
+cd submission
 ```
 
 ### 2. Buat Virtual Environment
