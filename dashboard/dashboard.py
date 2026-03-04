@@ -1,4 +1,6 @@
 import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
 import streamlit as st
 import os
 
@@ -15,6 +17,39 @@ def create_hourly_pattern_df(df):
 
 def create_temp_cluster_df(df):
     return df.groupby('temp_cluster')[['casual', 'registered']].mean().reset_index()
+
+def create_weather_temp_heatmap(df):
+    pivot_weather_temp = df.pivot_table(
+        index='weather_cluster', 
+        columns='temp_cluster', 
+        values='cnt', 
+        aggfunc='mean'
+    )
+    pivot_weather_temp = pivot_weather_temp.reindex(columns=['Cold', 'Mild', 'Hot'], 
+                                                   index=['Clear', 'Misty', 'Bad Weather'])
+    
+    fig, ax = plt.subplots(figsize=(10, 6))
+    sns.heatmap(pivot_weather_temp, annot=True, fmt=".0f", cmap="YlGnBu", ax=ax)
+    return fig
+def create_weather_rentals_df(df):
+    # Groupby data cuaca
+    weather_clustering = df.groupby('weather_cluster')[['casual', 'registered']].mean().reset_index()
+    
+    # Melt untuk plot berdampingan (Casual vs Registered)
+    melted_weather = weather_clustering.melt(
+        id_vars='weather_cluster',
+        value_vars=['casual', 'registered'],
+        var_name='user_type',
+        value_name='average_rentals'
+    )
+    
+    # Memastikan urutan kategorinya konsisten di dashboard
+    melted_weather['weather_cluster'] = pd.Categorical(
+        melted_weather['weather_cluster'],
+        categories=['Clear', 'Misty', 'Bad Weather'],
+        ordered=True
+    )
+    return melted_weather.sort_values('weather_cluster')
 
 def create_season_df(df):
     season_mapping = {1: 'Spring', 2: 'Summer', 3: 'Fall', 4: 'Winter'}
@@ -135,11 +170,42 @@ with col1:
         pivot_hourly = hourly_pattern_df.pivot(index='hr', columns='workingday', values='cnt')
         pivot_hourly.columns = ['Libur', 'Hari Kerja'] if len(pivot_hourly.columns) == 2 else pivot_hourly.columns
         st.line_chart(pivot_hourly, use_container_width=True)
+        
+        st.markdown("---")
+        st.subheader("Dampak Cuaca Terhadap Tipe Pengguna")
+       
+        # Panggil helper function
+        weather_rentals_df = create_weather_rentals_df(main_day_df) # Pastikan variabel dataframe utamamu sesuai, misal main_day_df
+
+        # Buat canvas Matplotlib
+        fig_weather, ax_weather = plt.subplots(figsize=(10, 6))
+
+        # Eksekusi visualisasi Seaborn
+        sns.barplot(
+            x='weather_cluster',
+            y='average_rentals',
+            hue='user_type',
+            data=weather_rentals_df,
+            palette='viridis',
+            ax=ax_weather
+        )
+
+        # Kustomisasi
+        ax_weather.set_title('Rata-Rata Penyewaan Sepeda (Casual vs Registered) per Cuaca', fontsize=14, fontweight='bold')
+        ax_weather.set_xlabel('Kondisi Cuaca', fontsize=12)
+        ax_weather.set_ylabel('Rata-rata Penyewaan', fontsize=12)
+
+        # Tampilkan di Streamlit
+        st.pyplot(fig_weather)
 
 with col2:
     st.markdown("**Dampak Suhu Terhadap Tipe Pengguna**")
     if not temp_cluster_df.empty:
         # Set index ke temp_cluster lalu tampilkan bar_chart untuk casual & registered
         st.bar_chart(data=temp_cluster_df.set_index('temp_cluster')[['casual', 'registered']], use_container_width=True)
-
+    st.markdown("---")
+    st.subheader("Analisis Lanjutan: Interaksi Cuaca & Suhu")
+    fig_heatmap = create_weather_temp_heatmap(main_day_df)
+    st.pyplot(fig_heatmap)
+    
 st.caption('Created by Alvis Aditya | Dicoding Data Analytics Submission')
